@@ -1,0 +1,101 @@
+C:\\Users\\e-life center\\Desktop\\donia\\third year\\arch\\Arch_project\\input.txt
+.data
+    inputPrompt:    .asciiz "Enter input file name (or 'q' to quit): "
+    modePrompt:     .asciiz "Choose heuristic (FF or BF): "
+    invalidMsg:     .asciiz "Invalid input or file not found.\n"
+    outputPrompt:   .asciiz "Results saved in output.txt\n"
+    newline:        .asciiz "\n"
+    filename:       .space 100
+    heuristic:      .space 10
+    itemBuffer:     .space 1000
+    bins:           .float 1.0  # initial bin capacity (can be reused)
+    maxBins:        .word 50    # up to 50 bins
+    binSpace:       .space 200  # 50 words for bin capacities
+    itemSizes:      .space 400  # 100 items max
+
+.text
+.globl main
+
+main:
+    li $v0, 4
+    la $a0, inputPrompt
+    syscall
+
+    li $v0, 8              # read filename
+    la $a0, filename
+    li $a1, 100
+    syscall
+
+    lb $t0, filename       # check for 'q' or 'Q'
+    li $t1, 'q'
+    li $t2, 'Q'
+    beq $t0, $t1, exit
+    beq $t0, $t2, exit
+
+    # open file
+    li $v0, 13             # open file syscall
+    la $a0, filename
+    li $a1, 0              # read mode
+    li $a2, 0
+    syscall
+    move $s0, $v0          # file descriptor
+
+    bltz $s0, file_error   # if file descriptor < 0, error
+
+    # read content from file
+    li $v0, 14
+    move $a0, $s0
+    la $a1, itemBuffer
+    li $a2, 1000
+    syscall
+
+    # close file
+    li $v0, 16
+    move $a0, $s0
+    syscall
+
+    # parse float values into itemSizes (placeholder)
+    # Implement parsing logic here
+
+    # prompt for heuristic
+    li $v0, 4
+    la $a0, modePrompt
+    syscall
+
+    li $v0, 8
+    la $a0, heuristic
+    li $a1, 10
+    syscall
+
+    # Call FF or BF based on input (simple compare for "FF")
+    # For now, assume always calling FF
+    jal first_fit
+
+    # Print output message
+    li $v0, 4
+    la $a0, outputPrompt
+    syscall
+
+    j main
+
+file_error:
+    li $v0, 4
+    la $a0, invalidMsg
+    syscall
+    j main
+
+exit:
+    li $v0, 10
+    syscall
+
+# -----------------------------
+# First Fit Algorithm
+# -----------------------------
+first_fit:
+    # Implement logic:
+    # 1. Initialize bin capacities
+    # 2. For each item:
+    #    - Check bin[i] if space >= item
+    #    - If so, subtract item from bin[i]
+    #    - Else, create new bin
+    jr $ra
